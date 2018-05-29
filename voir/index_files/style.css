@@ -1,0 +1,22 @@
+TD.menu{background: #62BDCF; font-size: 12 px;}
+TD.mlink {FONT-WEIGHT: bold; FONT-SIZE: 12 px; COLOR: #000000; FONT-FAMILY: Verdana}
+TD.mlink:hover {COLOR: #FFCC00; FONT-FAMILY: Tahoma; TEXT-DECORATION: none; font-size: 3 px;}
+td.mee {FONT-WEIGHT: bold; FONT-SIZE: 12 px; COLOR: #000000; FONT-FAMILY: Verdana}
+
+A.link {COLOR: #000000; TEXT-DECORATION: none}
+A.link:link {COLOR: #000000; TEXT-DECORATION: none}
+A.link:visited {COLOR: #000000; TEXT-DECORATION: none}
+A.link:hover {COLOR: #C55D00; TEXT-DECORATION: none}
+A.link:active {COLOR: #000000; TEXT-DECORATION: none}
+
+A.newslink {COLOR: #000000; FONT-FAMILY: Georgia; font-size: 12; TEXT-DECORATION: none; font-style: italic; }
+A.newslink:link {COLOR: #000000; FONT-FAMILY: Georgia; font-size: 12; TEXT-DECORATION: none; font-style: italic; }
+A.newslink:visited {COLOR: #000000; FONT-FAMILY: Georgia; font-size: 12; TEXT-DECORATION: none; font-style: italic; }
+A.newslink:hover {COLOR: #C55D00; FONT-FAMILY: Georgia; font-size: 12; TEXT-DECORATION: none; font-style: italic; }
+A.newslink:active {COLOR: #000000; FONT-FAMILY: Georgia; font-size: 12; TEXT-DECORATION: none; font-style: italic; }
+
+span.btext {COLOR: #000000; FONT-FAMILY: Tahoma; font-size: 14; font-weight: bold; }
+span.text {COLOR: #000000; FONT-FAMILY: Tahoma; font-size: 14; }
+span.newsdate {COLOR: #000000; FONT-FAMILY: Tahoma; font-size: 13; }
+span.toptext {COLOR: #184298; FONT-FAMILY: Tahoma; font-size: 15; font-weight: bold; text-align: center; width: 100%; }
+div.toptext {COLOR: #184298; FONT-FAMILY: Tahoma; font-size: 15; font-weight: bold; text-align: center; width: 100%; }
