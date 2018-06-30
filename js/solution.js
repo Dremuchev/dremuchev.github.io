@@ -1,5 +1,9 @@
 'use strict';
 
+if (document.location.search) {
+    getFile((document.location.search).replace(/^\?/, ''));
+}
+
 const imgLoader = document.querySelector('.image-loader');
 
 // событие перетаскивание файла
@@ -232,6 +236,7 @@ function onSelectFiles(event) {
     console.log(files[0]);
     sendFile(files[0]);
 }
+const imgURL = document.location.href;
 
 function sendFile(file) {
     errorWrap.classList.add('hidden');
@@ -251,7 +256,7 @@ function sendFile(file) {
                     console.log(xhr.responseText);
                     const result = JSON.parse(xhr.responseText);
                     img.src = result.url;
-                    url.value = result.url;
+                    url.value = document.location.herf + result.id;
                     img.setAttribute('alt', result.title);
                     imgID = result.id;
                     canvas.removeAttribute('class');
@@ -259,7 +264,6 @@ function sendFile(file) {
                     canvas.height = img.height;
                     menu.dataset.state = 'selected';
                     share.dataset.state = 'selected';
-                    getFile(imgID);
                     console.log(`Изображение опубликовано! Дата публикации: ${timeParser(result.timestamp)}`);
                     canvasSize();
                 }
@@ -290,8 +294,17 @@ function getFile(id) {
         console.log(xhr.responseText);
         const result = JSON.parse(xhr.responseText);
         img.src = result.url;
-        url.value = result.url;
-        console.log(`Изображение получено! Дата публикации: ${timeParser(result.timestamp)}`)
+        img.classList.remove('hidden');
+        url.value = imgURL + result.id;
+        img.setAttribute('alt', result.title);
+        imgID = result.id;
+        canvas.removeAttribute('class');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        menu.dataset.state = 'selected';
+        share.dataset.state = 'selected';
+        console.log(`Изображение получено! Дата публикации: ${timeParser(result.timestamp)}`);
+        canvasSize();
     }
 });
     xhr.send();
