@@ -165,14 +165,12 @@ function smoothCurve(points) {
     ctx.beginPath();
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
+    ctx.moveTo(...points[0]);
 
-    if (points.length > 2) {
-        for (let i = points.length - 2; i < points.length - 1; i++) {
-            ctx.moveTo(...points[i]);
-            smoothCurveBetween(points[i], points[i + 1]);
-        }
-        ctx.stroke();
+    for(let i = 1; i < points.length - 1; i++) {
+        smoothCurveBetween(points[i], points[i + 1]);
     }
+    ctx.stroke();
 }
 
 canvas.addEventListener("mousedown", event => {
@@ -236,7 +234,6 @@ function onSelectFiles(event) {
     console.log(files[0]);
     sendFile(files[0]);
 }
-const imgURL = document.location.href;
 
 function sendFile(file) {
     errorWrap.classList.add('hidden');
@@ -258,6 +255,7 @@ function sendFile(file) {
                     img.src = result.url;
                     img.setAttribute('alt', result.title);
                     imgID = result.id;
+                    url.value = `${document.location.href}?${imgID}`;
                     canvas.removeAttribute('class');
                     canvas.width = img.width;
                     canvas.height = img.height;
@@ -265,8 +263,8 @@ function sendFile(file) {
                     share.dataset.state = 'selected';
                     console.log(`Изображение опубликовано! Дата публикации: ${timeParser(result.timestamp)}`);
                     canvasSize();
-                    updateURL();
                 }
+            console.log(xhr.responseText);
             })
             xhr.send(formData);
         } else {
@@ -286,10 +284,6 @@ function onLoadEnd() {
     imgLoader.style.display = 'none';
 }
 
-function updateURL() {
-    url.value = `${document.location.href}?${imgID}`;
-}
-
 function getFile(id) {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', `https://neto-api.herokuapp.com/pic/${id}`);
@@ -300,7 +294,7 @@ function getFile(id) {
         img.src = result.url;
         img.classList.remove('hidden');
         img.setAttribute('alt', result.title);
-        imgID = result.id;
+        url.value = `${document.location.href}?${imgID}`;
         canvas.removeAttribute('class');
         canvas.width = img.width;
         canvas.height = img.height;
@@ -308,7 +302,6 @@ function getFile(id) {
         share.dataset.state = 'selected';
         console.log(`Изображение получено! Дата публикации: ${timeParser(result.timestamp)}`);
         canvasSize();
-        updateURL();
     }
 });
     xhr.send();
@@ -357,6 +350,8 @@ function removeEmptyComment() {
 
 // форма коментариев (создание)
 
+const commentPos = {x: 0, y: 0};
+
 function createNewComment(event) {
     const isCommentsOn = document.getElementById('comments-on').checked;
     if (comments.dataset.state === 'selected' && isCommentsOn) {
@@ -395,6 +390,7 @@ function createNewComment(event) {
         commentsSubmit.className = 'comments__submit';
         commentsSubmit.type = 'submit';
         commentsSubmit.value = 'Отправить';
+        // commentsSubmit.disabled = true;
 
         loader.appendChild(document.createElement('span'));
         loader.appendChild(document.createElement('span'));
@@ -410,6 +406,9 @@ function createNewComment(event) {
         form.style.left = event.pageX + 'px';
         form.style.top = event.pageY + 'px';
 
+        commentPos.x = event.pageX;
+        commentPos.y = event.pageY;
+
         form.appendChild(marker);
         form.appendChild(markerCheckbox);
         form.appendChild(commentsBody);
@@ -424,6 +423,7 @@ function createNewComment(event) {
 
 function createCommentForm(comments) {
     const app = document.querySelector('.app');
+    app.removeChild(app.lastChild);
 
     for (let comment in comments) {
 
@@ -451,8 +451,8 @@ function createCommentForm(comments) {
         message.className = 'comment__message';
         message.innerText = comments[comment].message;
 
-        const createMessaege = document.createElement('div');
-        createMessaege.className = 'comment';
+        const createMessage = document.createElement('div');
+        createMessage.className = 'comment';
 
         const loader = document.createElement('div');
         loader.className = 'loader hidden';
@@ -480,8 +480,8 @@ function createCommentForm(comments) {
         loader.appendChild(document.createElement('span'));
         loader.appendChild(document.createElement('span'));
         loader.appendChild(document.createElement('span'));
-        createMessaege.appendChild(loader);
-        commentsBody.appendChild(createMessaege);
+        createMessage.appendChild(loader);
+        commentsBody.appendChild(createMessage);
         commentsBody.appendChild(commentsInput);
         commentsBody.appendChild(commentsClose);
         commentsBody.appendChild(commentsSubmit);
@@ -527,4 +527,43 @@ function timeParser(miliseconds) {
     const options = {day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'};
     const formatDate = new Intl.DateTimeFormat("ru-RU", options).format;
     return formatDate(date);
+}
+
+// коментарии
+
+document.querySelector('.app').addEventListener('click', messageHandler);
+
+function sendNewComment(id, comment) {
+    console.log(comment)
+    const xhr = new XMLHttpRequest();
+    const body = 'message=' + encodeURIComponent(comment.message) +
+        '&left=' + comment.left +
+        '&top=' + comment.top;
+    xhr.open("POST", `https://neto-api.herokuapp.com/pic/${id}/comments`, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.addEventListener("loadstart", onLoadStart);
+    xhr.addEventListener("loadend", onLoadEnd);
+    xhr.addEventListener('load', () => {
+        if(xhr.status === 200) {
+            console.log(xhr.responseText);
+            const result = JSON.parse(xhr.responseText);
+            createCommentForm(result.comments);
+        }
+        console.log(xhr.responseText)
+    })
+    xhr.send(body);
+}
+
+function messageHandler(event) {
+    if (event.target.className === 'comments__submit') {
+        console.log(event.target.parentNode)
+        const element = event.target.parentNode.firstChild.nextSibling;
+        console.log(element);
+        event.preventDefault();
+        if (element.value) {
+            const comment = {'message': element.value, 'left': commentPos.x, 'top': commentPos.y};
+            sendNewComment(imgID, comment);
+            element.value = '';
+        }
+    }
 }
