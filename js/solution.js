@@ -298,9 +298,11 @@ function getFile(id) {
         canvas.removeAttribute('class');
         canvas.width = img.width;
         canvas.height = img.height;
+        imgID = result.id;
         menu.dataset.state = 'selected';
         share.dataset.state = 'selected';
         console.log(`Изображение получено! Дата публикации: ${timeParser(result.timestamp)}`);
+        createCommentForm(result.comments);
         canvasSize();
     }
 });
@@ -421,25 +423,29 @@ function createNewComment(event) {
     }
 }
 
+
+const currentComment = {x: 0, y: 0};
+
 function createCommentForm(comments) {
     const app = document.querySelector('.app');
-    app.removeChild(app.lastChild);
+    if (app.querySelector('.new')) {
+        app.removeChild(app.lastChild);
+    }
+
+    const form = document.createElement('div');
+    form.className = 'comments__form';
+
+    const marker = document.createElement('span');
+    marker.className = 'comments__marker';
+
+    const markerCheckbox = document.createElement('input');
+    markerCheckbox.className = 'comments__marker-checkbox';
+    markerCheckbox.type = 'checkbox';
+
+    const commentsBody = document.createElement('div');
+    commentsBody.className = 'comments__body';
 
     for (let comment in comments) {
-
-        const form = document.createElement('div');
-        form.className = 'comments__form';
-
-        const marker = document.createElement('span');
-        marker.className = 'comments__marker';
-
-        const markerCheckbox = document.createElement('input');
-        markerCheckbox.className = 'comments__marker-checkbox';
-        markerCheckbox.type = 'checkbox';
-
-        const commentsBody = document.createElement('div');
-        commentsBody.className = 'comments__body';
-
         const commit = document.createElement('div');
         commit.className = 'comment';
 
@@ -451,74 +457,54 @@ function createCommentForm(comments) {
         message.className = 'comment__message';
         message.innerText = comments[comment].message;
 
-        const createMessage = document.createElement('div');
-        createMessage.className = 'comment';
-
-        const loader = document.createElement('div');
-        loader.className = 'loader hidden';
-
-        const commentsInput = document.createElement('textarea');
-        commentsInput.className = 'comments__input';
-        commentsInput.setAttribute('type', 'text');
-        commentsInput.setAttribute('placeholder', 'Напишите ответ...');
-
-        const commentsClose = document.createElement('input');
-        commentsClose.className = 'comments__close';
-        commentsClose.type = 'button';
-        commentsClose.value = 'Закрыть';
-
-        const commentsSubmit = document.createElement('input');
-        commentsSubmit.className = 'comments__submit';
-        commentsSubmit.type = 'submit';
-        commentsSubmit.value = 'Отправить';
-
         commit.appendChild(time);
         commit.appendChild(message);
         commentsBody.appendChild(commit);
-        loader.appendChild(document.createElement('span'));
-        loader.appendChild(document.createElement('span'));
-        loader.appendChild(document.createElement('span'));
-        loader.appendChild(document.createElement('span'));
-        loader.appendChild(document.createElement('span'));
-        createMessage.appendChild(loader);
-        commentsBody.appendChild(createMessage);
-        commentsBody.appendChild(commentsInput);
-        commentsBody.appendChild(commentsClose);
-        commentsBody.appendChild(commentsSubmit);
 
         form.style.left = comments[comment].left + 'px';
         form.style.top = comments[comment].top + 'px';
-
-        form.appendChild(marker);
-        form.appendChild(markerCheckbox);
-        form.appendChild(commentsBody);
-        app.appendChild(form);
+        
+        commentPos.x = comments[comment].left;
+        commentPos.y = comments[comment].top;
     }
+
+    const createMessage = document.createElement('div');
+    createMessage.className = 'comment';
+
+    const loader = document.createElement('div');
+    loader.className = 'loader hidden';
+
+    const commentsInput = document.createElement('textarea');
+    commentsInput.className = 'comments__input';
+    commentsInput.setAttribute('type', 'text');
+    commentsInput.setAttribute('placeholder', 'Напишите ответ...');
+
+    const commentsClose = document.createElement('input');
+    commentsClose.className = 'comments__close';
+    commentsClose.type = 'button';
+    commentsClose.value = 'Закрыть';
+
+    const commentsSubmit = document.createElement('input');
+    commentsSubmit.className = 'comments__submit';
+    commentsSubmit.type = 'submit';
+    commentsSubmit.value = 'Отправить';
+
+    loader.appendChild(document.createElement('span'));
+    loader.appendChild(document.createElement('span'));
+    loader.appendChild(document.createElement('span'));
+    loader.appendChild(document.createElement('span'));
+    loader.appendChild(document.createElement('span'));
+    createMessage.appendChild(loader);
+    commentsBody.appendChild(createMessage);
+    commentsBody.appendChild(commentsInput);
+    commentsBody.appendChild(commentsClose);
+    commentsBody.appendChild(commentsSubmit);
+
+    form.appendChild(marker);
+    form.appendChild(markerCheckbox);
+    form.appendChild(commentsBody);
+    app.appendChild(form);
 }
-
-// https://neto-api.herokuapp.com/pic/${aba23fc0-1008-11e8-b8b2-2b0fbff0de7d}
-
-// const str = {
-//     id: "aba23fc0-1008-11e8-b8b2-2b0fbff0de7d",
-//     title: "Макет дизайна",
-//     url: "https://storage.googleapis.com/neto-api.appspot.com/pic/aba23fc0-1008-11e8-b8b2-2b0fbff0de7d/bMFAlDwf9AI.jpg",
-//     mask: "https://www.googleapis.com/download/storage/v1/b/neto-api.appspot.com/o/pic%2F8ece7a20-15f4-11e8-96fd-2513ea9afcae-mask.png?generation=1519100719825524&alt=media",
-//     timestamp: 1518449006013,
-//     comments: {
-//         "-L59YakIzQIO4_qiP6ws": {
-//             left: 100,
-//             message: "Тут мне кажется лучше подойдет розовый цвет",
-//             timestamp: 1518448045157,
-//             top: 65
-//         },
-//         "-L59bM_rv4fesvnQ1nts": {
-//             left: 953,
-//             message: "Эта картинка на коллаже слишком шумная",
-//             timestamp: 1518449031562,
-//             top: 480
-//         }
-//     },
-// };
 
 canvas.addEventListener('click', createNewComment);
 
@@ -557,11 +543,11 @@ function sendNewComment(id, comment) {
 function messageHandler(event) {
     if (event.target.className === 'comments__submit') {
         console.log(event.target.parentNode)
-        const element = event.target.parentNode.firstChild.nextSibling;
-        console.log(element);
+        const element = event.target.parentNode.querySelector('textarea');
         event.preventDefault();
         if (element.value) {
             const comment = {'message': element.value, 'left': commentPos.x, 'top': commentPos.y};
+            console.log(comment)
             sendNewComment(imgID, comment);
             element.value = '';
         }
