@@ -295,7 +295,7 @@ function getFile(id) {
         const result = JSON.parse(xhr.responseText);
         img.src = result.url;
         img.classList.remove('hidden');
-        url.value = imgURL + result.id;
+        url.value = `${imgURL} + ${result.id};
         img.setAttribute('alt', result.title);
         imgID = result.id;
         canvas.removeAttribute('class');
