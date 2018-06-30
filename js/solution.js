@@ -256,7 +256,6 @@ function sendFile(file) {
                     console.log(xhr.responseText);
                     const result = JSON.parse(xhr.responseText);
                     img.src = result.url;
-                    url.value = document.location.herf + result.id;
                     img.setAttribute('alt', result.title);
                     imgID = result.id;
                     canvas.removeAttribute('class');
@@ -266,6 +265,7 @@ function sendFile(file) {
                     share.dataset.state = 'selected';
                     console.log(`Изображение опубликовано! Дата публикации: ${timeParser(result.timestamp)}`);
                     canvasSize();
+                    updateURL();
                 }
             })
             xhr.send(formData);
@@ -286,6 +286,10 @@ function onLoadEnd() {
     imgLoader.style.display = 'none';
 }
 
+function updateURL() {
+    url.value = `${document.location.href}?${imgID}`;
+}
+
 function getFile(id) {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', `https://neto-api.herokuapp.com/pic/${id}`);
@@ -295,7 +299,6 @@ function getFile(id) {
         const result = JSON.parse(xhr.responseText);
         img.src = result.url;
         img.classList.remove('hidden');
-        url.value = `${imgURL} + ${result.id};
         img.setAttribute('alt', result.title);
         imgID = result.id;
         canvas.removeAttribute('class');
@@ -305,6 +308,7 @@ function getFile(id) {
         share.dataset.state = 'selected';
         console.log(`Изображение получено! Дата публикации: ${timeParser(result.timestamp)}`);
         canvasSize();
+        updateURL();
     }
 });
     xhr.send();
