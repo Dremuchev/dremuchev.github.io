@@ -1,4 +1,6 @@
 'use strict';
+let connection;
+let response;
 let imgID = null;
 
 if (location.search) {
@@ -91,15 +93,24 @@ function getShareData(id) {
         canvas.removeAttribute('class');
         canvas.width = img.width;
         canvas.height = img.height;
-        mask.width = img.width;
-        mask.height = img.height;
         imgID = result.id;
         menu.dataset.state = 'selected';
         comments.dataset.state = 'selected';
+
+        console.log(`Запущена функция getShareData(${imgID})`);
         console.log(`Изображение получено! Дата публикации: ${timeParser(result.timestamp)}`);
-        if(result.comments) {
+
+        if (result.comments) {
             createCommentsArray(result.comments);
         }
+
+        if (result.mask) {
+            mask.width = img.width;
+            mask.height = img.height;
+            mask.src = result.mask;
+            mask.classList.remove('hidden');
+        }
+
         if (document.getElementById('comments-off').checked) {
             console.log('off');
             const commentsForm = document.querySelectorAll('.comments__form');
@@ -107,12 +118,15 @@ function getShareData(id) {
                 comment.classList.add('hidden');
             }
         }
+        getConnect()
         canvasSize();
         closeAllForms();
     }
 });
     xhr.send();
 }
+
+let isDraw = false;
 
 function changeMode(event) {
     const element = event.target;
@@ -126,6 +140,7 @@ function changeMode(event) {
             menu.dataset.state = 'default';
             removeEmptyComment();
             closeAllForms();
+            sendMask(response);
         }
         if(parent.classList.contains('new') || element.classList.contains('new')) {
             clearCanvas();
@@ -136,12 +151,45 @@ function changeMode(event) {
             comments.dataset.state = 'selected';
         }
         if(parent.classList.contains('draw') || element.classList.contains('draw')) {
+            isDraw = true;
             menu.dataset.state = 'selected';
             draw.dataset.state = 'selected';
         }
         if(parent.classList.contains('share') || element.classList.contains('share')) {
             menu.dataset.state = 'selected';
             share.dataset.state = 'selected';
+        }
+    }
+}
+
+let emptyCanvasSize = 0;
+let currentCanvasSize = 0;
+
+function sendMask(response) {
+
+    if (isDraw) {
+        canvas.toBlob(blob => {
+            currentCanvasSize = blob.size;
+            if (currentCanvasSize !== emptyCanvasSize) {
+                connection.send(blob);
+            }
+        })
+        isDraw = false;
+    } else {
+        setTimeout(function() {
+            canvas.toBlob(blob => emptyCanvasSize = blob.size);
+        }, 1000);
+        console.log('Режим рисования выключен!');
+    }
+
+    if (response) {
+            if (response.event === 'mask') {
+            console.log('Событие маски...');
+            mask.classList.remove('hidden');
+            mask.src = response.url;
+            clearCanvas();
+        } else if (response.event === 'comment') {
+            getData(imgID);
         }
     }
 }
@@ -158,6 +206,7 @@ let needsRepaint = false;
 
 const colorButtons = document.querySelector('.draw-tools');
 colorButtons.addEventListener('click', colorSelect);
+ctx.strokeStyle = color['red'];
 
 function colorSelect(event) {
     if (event.target.name === 'color') {
@@ -171,6 +220,8 @@ function canvasSize() {
     clearCanvas();
     canvas.width = img.width;
     canvas.height = img.height;
+    mask.width = img.width;
+    mask.height = img.height;
 }
 
 function clearCanvas() {
@@ -216,23 +267,6 @@ canvas.addEventListener("mousedown", event => {
 canvas.addEventListener("mouseup", () => {
     curves = [];
     drawing = false;
-
-
-
-    // здесь ступор
-
-
-
-    // canvas.toBlob(function(blob){
-    //     const xhr = new XMLHttpRequest();
-    //     xhr.open('POST', 'https://neto-api.herokuapp.com/pic/');
-    //     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    //     xhr.addEventListener("loadstart", onLoadStart);
-    //     xhr.addEventListener("loadend", onLoadEnd);
-    //     xhr.addEventListener('load', () => console.log(xhr.responseText));
-    //     console.log(blob);
-    //     xhr.send(blob);
-    // })
 });
 
 canvas.addEventListener("mouseleave", () => {
@@ -268,17 +302,19 @@ canvas.addEventListener('dblclick', clearCanvas);
 
 function copyURL() {
     url.select();
-    try {
-        document.execCommand('copy');
-    } catch(err) {
-        console.log('Can`t copy!');
-    }
+    document.execCommand('copy');
     console.log(`Текст скопирован в буфер обмена...`);
 }
 
 function onSelectFiles(event) {
     const files = event.target.files;
     sendFile(files[0]);
+}
+
+function getConnect() {
+    connection = new WebSocket(`wss://neto-api.herokuapp.com/pic/${imgID}`);
+    connection.addEventListener('open', () => console.log('Connection open...'));
+    connection.addEventListener('message', event => sendMask(JSON.parse(event.data)));
 }
 
 function sendFile(file) {
@@ -302,16 +338,16 @@ function sendFile(file) {
                     canvas.removeAttribute('class');
                     canvas.width = img.width;
                     canvas.height = img.height;
-                    mask.width = img.width;
-                    mask.height = img.height;
                     menu.dataset.state = 'selected';
                     share.dataset.state = 'selected';
+
+                    console.log(`Запущена функция sendFile(${imgID})`);
                     console.log(`Изображение опубликовано! Дата публикации: ${timeParser(result.timestamp)}`);
-                    canvasSize();
+
                     getFile(imgID);
                     clearForms();
+                    getConnect();
                 }
-            console.log(xhr.responseText);
             })
             xhr.send(formData);
         } else {
@@ -336,7 +372,6 @@ function getFile(id) {
     xhr.open('GET', `https://neto-api.herokuapp.com/pic/${id}`);
     xhr.addEventListener('load', () => {
         if (xhr.status === 200){
-        console.log(xhr.responseText);
         const result = JSON.parse(xhr.responseText);
         img.src = result.url;
         img.classList.remove('hidden');
@@ -349,7 +384,10 @@ function getFile(id) {
         imgID = result.id;
         menu.dataset.state = 'selected';
         share.dataset.state = 'selected';
+
+        console.log(`Запущена функция getFile(${imgID})`);
         console.log(`Изображение получено! Дата публикации: ${timeParser(result.timestamp)}`);
+
         if(result.comments) {
             createCommentsArray(result.comments);
         }
@@ -365,7 +403,6 @@ function getData(id) {
     xhr.open('GET', `https://neto-api.herokuapp.com/pic/${id}`);
     xhr.addEventListener('load', () => {
         if (xhr.status === 200){
-        console.log(xhr.responseText);
         const result = JSON.parse(xhr.responseText);
         if (!img.getAttribute('src')) {
             console.log('no src img')
@@ -375,7 +412,11 @@ function getData(id) {
         imgID = result.id;
         mask.width = img.width;
         mask.height = img.height;
+
+        console.log(`Запущена функция getData(${imgID})`);
         console.log(`Данные получены! Дата публикации: ${timeParser(result.timestamp)}`);
+        console.log();
+
         dataStorage = 0;
         for (const comment in result.comments) {
             dataStorage++;
@@ -528,7 +569,6 @@ function closeForm(event) {
 }
 function closeAllForms() {
     const otherForms = document.querySelectorAll('.comments__body');
-    console.log(otherForms);
     for (const body of otherForms) {
         body.style.display = 'none';
     }
@@ -649,7 +689,6 @@ function createCommentForm(comments) {
 
 function appendComment(element, target) {
     const comments = target.querySelector('.comments__body').querySelectorAll('.comment');
-    console.log(comments);
     closeAllForms();
     if (target) {
         target.querySelector('.comments__body').insertBefore(element, target.querySelector('.load'));
@@ -688,8 +727,7 @@ function sendNewComment(id, comment, target) {
             createCommentsArray(result.comments);
             needReload = false;
         }
-        console.log('Comment has been sent!')
-        console.log(xhr.responseText)
+        console.log('Comment has been sent!');
     })
     xhr.send(body);
 }
@@ -707,19 +745,3 @@ function messageHandler(event) {
         }
     }
 }
-
-function debounce(callback, delay) {
-    let timeout;
-    return () => {
-        clearTimeout(timeout);
-        timeout = setTimeout(function() {
-            timeout = null;
-            callback();
-        }, delay);
-    };
-};
-
-document.addEventListener('mousemove', debounce(() => {
-    console.log('Silent mode. Sending data request...');
-    getData(imgID);
-}, 5000));
