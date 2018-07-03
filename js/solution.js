@@ -178,7 +178,7 @@ function sendMask(response) {
     } else {
         setTimeout(function() {
             canvas.toBlob(blob => emptyCanvasSize = blob.size);
-        }, 1000);
+        }, 7000);
         console.log('Режим рисования выключен!');
     }
 
