@@ -752,9 +752,9 @@ function sendNewComment(id, comment, target) {
 }
 
 function messageHandler(event) {
-    event.preventDefault();
     console.log(`Запущена функция messageHandler()`);
     if (event.target.className === 'comments__submit') {
+        event.preventDefault();
         const element = event.target.parentNode.querySelector('textarea');
         const form = event.target.parentNode.parentNode;
         if (element.value) {
