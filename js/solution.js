@@ -42,6 +42,7 @@ function canvasSize() {
     console.log('Запущена функция canvasSize...');
     clearCanvas();
     if (checkImageLoad()) {
+        canvas.removeAttribute('class');
         console.log('Изображение загрузилось. Меняю размер холста...');
         canvas.width = img.width;
         canvas.height = img.height;
@@ -69,10 +70,8 @@ function checkImageLoad() {
     }
 }
 
-// переход по ссылке
-
 if (location.search) {
-    console.log(`Перехожу по ссылке ${`\`${location.origin + location.pathname}?${imgID}\`;`}`);
+    console.log(`Перехожу по ссылке ${`\`${location.origin + location.pathname}?${imgID}\``}`);
     getShareData((location.search).replace(/^\?/, ''));
 }
 
@@ -153,9 +152,6 @@ function loadShareData(result) {
     img.src = result.url;
     url.value = `${location.href}?${imgID}`;
     imgID = result.id;
-    if (checkImageLoad()) {
-        canvas.removeAttribute('class');
-    }
     menu.dataset.state = 'selected';
     comments.dataset.state = 'selected';
 
@@ -164,8 +160,6 @@ function loadShareData(result) {
     }
 
     if (result.mask) {
-        mask.width = img.width;
-        mask.height = img.height;
         mask.src = result.mask;
         mask.classList.remove('hidden');
     }
@@ -257,13 +251,13 @@ function pullComments(result) {
     countComments = 0;
 
     for (const comment in result.comments) {
-        dataStorage++;
+        countComments++;
     }
     const countCurrentComments = document.getElementsByClassName('comment').length - document.getElementsByClassName('comment load').length;
     needReload = (countComments === countCurrentComments) ? false : true;
 
-    if(result.comments && needReload) {
-        createCommentsArray(result.comments);
+    if(result.comment && needReload) {
+        createCommentsArray(result.comment);
     }
 
     if (document.getElementById('comments-off').checked) {
@@ -401,22 +395,23 @@ function sendFile(file) {
         xhr.addEventListener("loadend", () => imgLoader.style.display = 'none');
         xhr.addEventListener('load', () => {
             if(xhr.status === 200) {
-                const result = JSON.parse(xhr.responseText);
-                img.src = result.url;
-                imgID = result.id;
-                url.value = `${location.origin + location.pathname}?${imgID}`;
-                canvas.removeAttribute('class');
-                menu.dataset.state = 'selected';
-                share.dataset.state = 'selected';
 
-                console.log(`Изображение опубликовано! Дата публикации: ${timeParser(result.timestamp)}`);
+            const result = JSON.parse(xhr.responseText);
+            img.src = result.url;
+            imgID = result.id;
+            url.value = `${location.origin + location.pathname}?${imgID}`;
+            menu.dataset.state = 'selected';
+            share.dataset.state = 'selected';
 
-                canvasSize();
-                getFile(imgID);
-                clearForms();
-                getWSConnect();
-            }
-        })
+            console.log(`Изображение опубликовано! Дата публикации: ${timeParser(result.timestamp)}`);
+
+            canvasSize();
+            getFile(imgID);
+            clearForms();
+            getWSConnect();
+
+        }
+    })
         xhr.send(formData);
     } else {
         errorWrap.classList.remove('hidden');
@@ -435,8 +430,6 @@ function getFile(id) {
         const result = JSON.parse(xhr.responseText);
         img.src = result.url;
         imgID = result.id;
-        img.classList.remove('hidden');
-        canvas.removeAttribute('class');
         url.value = `${location.origin + location.pathname}?${imgID}`;
         menu.dataset.state = 'selected';
         share.dataset.state = 'selected';
