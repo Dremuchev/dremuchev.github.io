@@ -63,7 +63,9 @@ function maskSize() {
 
 function checkImageLoad() {
     console.log('Запущена функция checkImageLoad...');
-    if (img.complete){
+    console.log(img.complete);
+    console.log(img.naturalWidth);
+    if (img.complete && img.naturalHeight !== 0){
         return true;
     } else {
         return false;
@@ -140,41 +142,54 @@ function onFilesDrop(event) {
 // получение файла после перехода по ссылке
 
 function getShareData(id) {
-    console.log(`Запущена функция getShareData(${imgID})`);
+    console.log(`Запущена функция getShareData()`);
     const xhr = new XMLHttpRequest();
     xhr.open('GET', `https://neto-api.herokuapp.com/pic/${id}`);
-    xhr.addEventListener('load', () => loadShareData(JSON.parse(xhr.responseText)));
+    xhr.addEventListener('load', () => {
+        console.log(xhr.status)
+        if (xhr.status === 200) {
+            loadShareData(JSON.parse(xhr.responseText));
+        } else {
+            errorWrap.classList.remove('hidden');
+            errorMessage.innerText = `Произошла ошибка ${xhr.status}! ${xhr.statusText}... Повторите попытку позже... `;
+        }
+    })
     xhr.send();
 }
 
 function loadShareData(result) {
-    console.log(`getShareData(${imgID}) : Изображение получено! Дата публикации: ${timeParser(result.timestamp)}`);
-    img.src = result.url;
-    url.value = `${location.href}?${imgID}`;
-    imgID = result.id;
-    menu.dataset.state = 'selected';
-    comments.dataset.state = 'selected';
+    console.log(`loadShareData() : Изображение получено! Дата публикации: ${timeParser(result.timestamp)}`);
+    if (checkImageLoad()) {
+        img.src = result.url;
+        url.value = `${location.href}?${imgID}`;
+        imgID = result.id;
+        menu.dataset.state = 'selected';
+        comments.dataset.state = 'selected';
 
-    if (result.comments) {
-        createCommentsArray(result.comments);
-    }
-
-    if (result.mask) {
-        mask.src = result.mask;
-        mask.classList.remove('hidden');
-    }
-
-    if (document.getElementById('comments-off').checked) {
-        console.log('Комментарии выключены!');
-        const commentsForm = document.querySelectorAll('.comments__form');
-        for (const comment of commentsForm) {
-            comment.classList.add('hidden');
+        if (result.comments) {
+            createCommentsArray(result.comments);
         }
+
+        if (result.mask) {
+            mask.src = result.mask;
+            mask.classList.remove('hidden');
+        }
+
+        if (document.getElementById('comments-off').checked) {
+            console.log('Комментарии выключены!');
+            const commentsForm = document.querySelectorAll('.comments__form');
+            for (const comment of commentsForm) {
+                comment.classList.add('hidden');
+            }
+        }
+        maskSize();
+        canvasSize();
+        getWSConnect()
+        closeAllForms();
+    } else {
+        errorWrap.classList.remove('hidden');
+        errorMessage.innerText = `Не удалось загрузить изображение. Повторите попытку позже...`;
     }
-    maskSize();
-    canvasSize();
-    getWSConnect()
-    closeAllForms();
 }
 
 // переключение режимов
@@ -377,6 +392,10 @@ function getWSConnect() {
     connection = new WebSocket(`wss://neto-api.herokuapp.com/pic/${imgID}`);
     connection.addEventListener('open', () => console.log('Connection open...'));
     connection.addEventListener('message', event => sendMask(JSON.parse(event.data)));
+    connection.addEventListener('error', error => {
+        errorWrap.classList.remove('hidden');
+        errorMessage.innerText = `Произошла ошибка ${error.data}! Повторите попытку позже... `;
+});
 }
 
 // функция отправки файла на сервер
@@ -394,6 +413,7 @@ function sendFile(file) {
         xhr.addEventListener("loadstart", () => imgLoader.style.display = 'block');
         xhr.addEventListener("loadend", () => imgLoader.style.display = 'none');
         xhr.addEventListener('load', () => {
+            console.log(xhr.status)
             if(xhr.status === 200) {
 
             const result = JSON.parse(xhr.responseText);
@@ -410,6 +430,9 @@ function sendFile(file) {
             clearForms();
             getWSConnect();
 
+        } else {
+            errorWrap.classList.remove('hidden');
+            errorMessage.innerText = `Произошла ошибка ${xhr.status}! ${xhr.statusText}... Повторите попытку позже... `;
         }
     })
         xhr.send(formData);
@@ -426,24 +449,28 @@ function getFile(id) {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', `https://neto-api.herokuapp.com/pic/${id}`);
     xhr.addEventListener('load', () => {
+        console.log(xhr.status)
         if (xhr.status === 200){
-        const result = JSON.parse(xhr.responseText);
-        img.src = result.url;
-        imgID = result.id;
-        url.value = `${location.origin + location.pathname}?${imgID}`;
-        menu.dataset.state = 'selected';
-        share.dataset.state = 'selected';
+            const result = JSON.parse(xhr.responseText);
+            img.src = result.url;
+            imgID = result.id;
+            url.value = `${location.origin + location.pathname}?${imgID}`;
+            menu.dataset.state = 'selected';
+            share.dataset.state = 'selected';
 
-        console.log(`Изображение получено! Дата публикации: ${timeParser(result.timestamp)}`);
+            console.log(`Изображение получено! Дата публикации: ${timeParser(result.timestamp)}`);
 
-        if(result.comments) {
-            createCommentsArray(result.comments);
+            if(result.comments) {
+                createCommentsArray(result.comments);
+            }
+
+            maskSize();
+            canvasSize();
+            closeAllForms();
+        } else {
+            errorWrap.classList.remove('hidden');
+            errorMessage.innerText = `Произошла ошибка ${xhr.status}! ${xhr.statusText}... Повторите попытку позже... `;
         }
-
-        maskSize();
-        canvasSize();
-        closeAllForms();
-    }
 });
     xhr.send();
 }
@@ -601,7 +628,7 @@ function markerClick(event) {
 // создание массива с коментариями, полученными с сервера
 
 function createCommentsArray(comments) {
-    console.log(`Запущена функция createCommentsArray(${comments})`);
+    console.log(`Запущена функция createCommentsArray()`);
     const commentArray = [];
     for (const comment in comments) {
         commentArray.push(comments[comment]);
@@ -613,7 +640,7 @@ function createCommentsArray(comments) {
 // наполнение DOM комментариями
 
 function createCommentForm(comments) {
-    console.log(`Запущена функция createCommentForm(${comments})`);
+    console.log(`Запущена функция createCommentForm()`);
     const app = document.querySelector('.app');
 
     for (let comment of comments) {
@@ -733,12 +760,16 @@ function sendNewComment(id, comment, target) {
     xhr.addEventListener("loadstart", () => target.querySelector('.loader').classList.remove('hidden'));
     xhr.addEventListener("loadend", () => target.querySelector('.loader').classList.add('hidden'));
     xhr.addEventListener('load', () => {
+        console.log(xhr.status)
         if(xhr.status === 200) {
             console.log('Комментарий был отправвлен!');
             const result = JSON.parse(xhr.responseText);
             clearForms();
             createCommentsArray(result.comments);
             needReload = false;
+        } else {
+            errorWrap.classList.remove('hidden');
+            errorMessage.innerText = `Произошла ошибка ${xhr.status}! ${xhr.statusText}... Повторите попытку позже... `;
         }
     })
     xhr.send(body);
