@@ -9,7 +9,7 @@
 
   <body>
     <div class="wrap app" data-state="initial">
-      <ul class="menu">
+      <ul class="menu" data-state="initial">
         <li class="menu__item drag"></li>
 
         <li class="menu__item burger">
@@ -55,7 +55,8 @@
         </li>
       </ul>
 
-      <img class="current-image" src="./pic/image.jpg">
+      <img class="current-image" src="">
+        <img class="mask hidden" src="">
       
       <div class="error hidden">
         <h4 class="error__header">Ошибка</h4>
@@ -73,8 +74,13 @@
         <p class="image-loader__message">Загружаю изображение...</p>
       </div>
     </div>
+    <canvas id="canvas" class="hidden"></canvas>
+    <input accept="image/jpeg, image/png" id="fileInput" class="hidden" type="file">
   </body>
-
   <script src="./js/solution.js"></script>
+  <script src="./js/draw.js"></script>
+  <script src="./js/drag.js"></script>
+  <script src="./js/comments.js"></script>
+  <script src="./js/server.js"></script>
 
 </html>
