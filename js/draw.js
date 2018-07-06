@@ -1,6 +1,7 @@
 'use strict';
 
 window.addEventListener('resize', canvasSize);
+window.addEventListener('resize', maskSize);
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 const colorButtons = document.querySelector('.draw-tools');
