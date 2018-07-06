@@ -28,6 +28,7 @@ let response;
 let countComments;
 
 document.addEventListener('click', () => errorWrap.classList.add('hidden'));
+document.addEventListener('mousedown', clickToMove);
 img.addEventListener('load', canvasSize);
 menu.addEventListener('click', changeMode);
 copyButton.addEventListener('click', copyURL);
@@ -45,6 +46,8 @@ function canvasSize() {
         canvas.height = img.height;
     }
 }
+
+// определение размера маски
 
 function maskSize() {
     console.log('Запущена функция maskSize...');
@@ -69,8 +72,6 @@ function checkImageLoad() {
     }
 }
 
-document.addEventListener('mousedown', clickToMove);
-
 function clickToMove(event) {
     if(event.target.classList.contains('drag')) {
         movedPiece = event.target.parentNode;
@@ -89,7 +90,6 @@ function changeMode(event) {
 
     if (element.tagName === 'LI' || parent.tagName === 'LI') {
         if(parent.classList.contains('burger') || element.classList.contains('burger')) {
-            const isNewComment = document.getElementsByClassName('comments__form new')[0];
             currentMode.dataset.state = '';
             menu.dataset.state = 'default';
             removeEmptyComment();
