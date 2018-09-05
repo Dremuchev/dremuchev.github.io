@@ -34,11 +34,6 @@ function handleClick(event) {
         const year = currentBook.querySelector('.book-publish');
         const pic = currentBook.querySelector('img');
 
-        console.log(title.textContent)
-        console.log(author.textContent)
-        console.log(year.textContent)
-        console.log(pic.src)
-
         document.getElementById('input-title').value = title.textContent;
         document.getElementById('input-author').value = author.textContent;
         document.getElementById('input-publish').value = year.textContent;
@@ -77,7 +72,6 @@ function handleClick(event) {
             document.querySelector('.new-book img').addEventListener('error', toggleEmptyImage);
             document.querySelector('.new-book').classList.remove('new-book');
         } else {
-            console.log(editingBook)
             editingBook.querySelector('.book-title').textContent = localStorage.title;
             editingBook.querySelector('.book-authors').textContent = localStorage.author;
             editingBook.querySelector('.book-publish p').textContent = localStorage.year;
