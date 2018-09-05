@@ -16,9 +16,12 @@ function sendFile(file) {
         xhr.addEventListener("loadend", () => imgLoader.style.display = 'none');
         xhr.addEventListener('load', () => {
             if(xhr.status === 200) {
-
+            if(connection) {
+                connection.close(1000, 'Работа закончена');
+            }
             const result = JSON.parse(xhr.responseText);
             img.src = result.url;
+            mask.src = '';
             imgID = result.id;
             url.value = `${location.origin + location.pathname}?${imgID}`;
             menu.dataset.state = 'selected';
@@ -26,8 +29,6 @@ function sendFile(file) {
 
             console.log(`Изображение опубликовано! Дата публикации: ${timeParser(result.timestamp)}`);
 
-            canvasSize();
-            // getFile(imgID);
             clearForms();
             getWSConnect();
 
@@ -50,6 +51,7 @@ function getWSConnect() {
     connection = new WebSocket(`wss://neto-api.herokuapp.com/pic/${imgID}`);
     connection.addEventListener('open', () => console.log('Connection open...'));
     connection.addEventListener('message', event => sendMask(JSON.parse(event.data)));
+    connection.addEventListener('close', event => console.log('Вебсокет-соединение закрыто'));
     connection.addEventListener('error', error => {
         errorWrap.classList.remove('hidden');
         errorMessage.innerText = `Произошла ошибка ${error.data}! Повторите попытку позже... `;
@@ -107,8 +109,6 @@ function loadShareData(result) {
             comment.classList.add('hidden');
         }
     }
-    maskSize();
-    canvasSize();
     getWSConnect()
     closeAllForms();
 }
@@ -150,6 +150,7 @@ function sendMask(response) {
         if (currentCanvasSize !== emptyCanvasSize) {
             connection.send(blob);
         }
+        console.log(`emptyCanvasSize = ${emptyCanvasSize}. currentCanvasSize = ${currentCanvasSize}. Режим рисования включен!`);
     })
         isDraw = false;
     } else {
@@ -162,11 +163,12 @@ function sendMask(response) {
     if (response) {
         console.log(response);
         if (response.event === 'mask') {
-            console.log('Событие маски...');
+            console.log('Событие mask...');
             mask.classList.remove('hidden');
             mask.src = response.url;
             clearCanvas();
         } else if (response.event === 'comment') {
+            console.log('Событие comment...');
             pullComments(response);
         }
     }

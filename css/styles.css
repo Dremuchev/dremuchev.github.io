@@ -685,8 +685,6 @@ body {
 }
 
 .mask {
-  max-width: 70%;
-  max-height: 100%;
   position: absolute;
   top: 50%;
   left: 50%;
