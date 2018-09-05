@@ -100,11 +100,9 @@ function handleInput(event) {
         localStorage.setItem('title', event.target.value);
     }
 
-
     if (event.target.id === 'input-author') {
         localStorage.setItem('author', event.target.value);
     }
-
 
     if (event.target.id === 'input-publish') {
         if(event.target.value > 2017) {
@@ -117,8 +115,7 @@ function handleInput(event) {
 
         localStorage.setItem('year', event.target.value);
     }
-
-
+    
     if (event.target.id === 'input-pic') {
         localStorage.setItem('pic', event.target.value);
     }

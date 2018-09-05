@@ -237,4 +237,4 @@ const books = [ { author: 'Вордерман Кэрол',
     { author: 'Саммерфильд Марк',
         pic: 'https://img2.labirint.ru/books38/376836/covermid.jpg',
         title: 'Программирование на языке Go. Разработка приложений XXI века',
-        year: 2014 } ]
+        year: 2014 } ];
