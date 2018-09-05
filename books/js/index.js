@@ -115,7 +115,7 @@ function handleInput(event) {
 
         localStorage.setItem('year', event.target.value);
     }
-    
+
     if (event.target.id === 'input-pic') {
         localStorage.setItem('pic', event.target.value);
     }
