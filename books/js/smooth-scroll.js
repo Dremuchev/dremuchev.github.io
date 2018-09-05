@@ -4,6 +4,7 @@ const body = document.querySelector('body');
 const documentHeight = body.offsetHeight;
 
 scrollButton.addEventListener('click', scrollToBottom);
+document.addEventListener('scroll', toggleScroll)
 
 document.addEventListener('wheel', toggleScroll);
 
