@@ -1,3 +1,17 @@
+#scroll {
+    position: fixed;
+    left: 3%;
+    bottom: 2%;
+    width: 50px;
+    height: 50px;
+}
+
+#input-publish {
+    width: 100px;
+    text-align: center;
+    padding: 0;
+}
+
 html {
     width: 100%;
     background-color: #202020;
@@ -212,12 +226,6 @@ div p {
 
 .book-form-input-wrapper:last-child {
     margin-bottom: 0;
-}
-
-#input-publish {
-    width: 100px;
-    text-align: center;
-    padding: 0;
 }
 
 .book-form-input {
