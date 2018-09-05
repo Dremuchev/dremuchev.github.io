@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bookshelf</title>
+    <link rel="stylesheet" href="./css/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Cookie|Montserrat:400,700|Roboto+Slab|Vollkorn:400i&amp;subset=cyrillic-ext" rel="stylesheet">
+    <script type="text/javascript" src="./src/books.js"></script>
+</head>
+<body>
+    <div class="main-wrapper">
+        <section class="header">
+            <div class="header-wrapper">
+                <h1 class="header-title">Книжная полка</h1>
+            </div>
+        </section>
+
+        <section class="main-content ">
+            <button class="btn-book-add">Добавить книгу</button>
+        </section>
+
+        <section class="main-form hidden">
+            <form class="book-form">
+                <h2 class="book-form-title">Редактирование книги</h2>
+                <fieldset class="book-form-fieldset">
+                    <div class="book-form-input-wrapper">
+                        <label class="book-form-input-label label-title" for="input-title">Наименование</label>
+                        <input id="input-title" class="book-form-input" type="text" placeholder="Введите наименование">
+                    </div>
+                    <div class="book-form-input-wrapper">
+                        <label class="book-form-input-label label-author" for="input-author">Автор</label>
+                        <input id="input-author" class="book-form-input" type="text" placeholder="Введите автора книги">
+                    </div>
+                    <div class="book-form-input-wrapper">
+                        <label class="book-form-input-label label-publish" for="input-publish">Год</label>
+                        <input id="input-publish" class="book-form-input" type="text" placeholder="ГГГГ">
+                    </div>
+                    <div class="book-form-input-wrapper">
+                        <label class="book-form-input-label label-pic" for="input-pic">Изображение</label>
+                        <input type="url" id="input-pic" class="book-form-input" placeholder="Введите ссылку на изображение">
+                    </div>
+                </fieldset>
+                <div class="button-form-wrapper">
+                    <button class="submit-form-button btn-submit hidden" type="submit">Сохранить</button>
+                    <button class="reset-form-button btn-reset" type="reset">Отменить</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="footer"></section>
+    </div>
+    <script type="text/javascript" src="./js/index.js"></script>
+</body>
+</html>
