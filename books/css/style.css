@@ -180,6 +180,7 @@ a:hover {
     border-radius: 10px;
     box-shadow: 0 0 40px rgba(0, 0, 0, .3) inset;
     padding: 25px 0;
+    margin-top: 25px;
 }
 
 .book-form-title {

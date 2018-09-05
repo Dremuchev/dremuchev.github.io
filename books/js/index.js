@@ -4,8 +4,8 @@ const mainContent =  document.querySelector('.main-content');
 const mainForm = document.querySelector('.main-form');
 const formFields = document.querySelector('.book-form-fieldset');
 
-document.addEventListener('click', bookEdit);
-formFields.addEventListener('input', saveValue);
+document.addEventListener('click', handleClick);
+formFields.addEventListener('input', handleInput);
 
 // Переход от формы к списку и обратно
 function goTo(target) {
@@ -22,7 +22,7 @@ function goTo(target) {
 }
 
 // Нажатие кнопок
-function bookEdit(event) {
+function handleClick(event) {
 
 // Нажатие кнопки "Реадктировать"
     if (event.target.classList.contains('edit')) {
@@ -43,6 +43,8 @@ function bookEdit(event) {
         localStorage.setItem('author', author.innerText);
         localStorage.setItem('year', year.innerText);
         localStorage.setItem('pic', pic.src);
+
+        checkLocalStorage();
         goTo('form');
     }
 
@@ -53,6 +55,7 @@ function bookEdit(event) {
 
 // Нажатие кнопки "Добавить"
     if (event.target.classList.contains('btn-book-add')) {
+        checkLocalStorage();
         document.querySelector('.book-form').reset();
         goTo('form');
     }
@@ -86,13 +89,12 @@ function bookEdit(event) {
 
 // Проверка изображения книги
 function toggleEmptyImage(event) {
-    console.log(event.currentTarget)
     event.currentTarget.src= 'src/no-image.png';
 }
 
 
 // Запись данных локально для последующей отрисовки новой книги
-function saveValue(event) {
+function handleInput(event) {
     if (event.target.id === 'input-title') {
         localStorage.setItem('title', event.target.value);
     }
@@ -104,6 +106,14 @@ function saveValue(event) {
 
 
     if (event.target.id === 'input-publish') {
+        if(event.target.value > 2017) {
+            event.target.value = 2017;
+        }
+
+        if (event.target.value.length > 4) {
+            event.target.value = event.target.value.substr(0, 4);
+        }
+
         localStorage.setItem('year', event.target.value);
     }
 
@@ -121,7 +131,6 @@ function checkLocalStorage() {
     } else {
         document.querySelector('.btn-submit').classList.add('hidden');
     }
-        console.log(localStorage)
 }
 
 mainContent.appendChild(createBookEngine(books.map(el => createBook(el))));
