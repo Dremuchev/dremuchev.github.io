@@ -34,9 +34,14 @@ function handleClick(event) {
         const year = currentBook.querySelector('.book-publish');
         const pic = currentBook.querySelector('img');
 
-        document.getElementById('input-title').value = title.innerText;
-        document.getElementById('input-author').value = author.innerText;
-        document.getElementById('input-publish').value = year.innerText;
+        console.log(title.textContent)
+        console.log(author.textContent)
+        console.log(year.textContent)
+        console.log(pic.src)
+
+        document.getElementById('input-title').value = title.textContent;
+        document.getElementById('input-author').value = author.textContent;
+        document.getElementById('input-publish').value = year.textContent;
         document.getElementById('input-pic').value = pic.src;
 
         localStorage.setItem('title', title.innerText);
@@ -55,6 +60,7 @@ function handleClick(event) {
 
 // Нажатие кнопки "Добавить"
     if (event.target.classList.contains('btn-book-add')) {
+        localStorage.clear();
         checkLocalStorage();
         document.querySelector('.book-form').reset();
         goTo('form');
@@ -71,9 +77,10 @@ function handleClick(event) {
             document.querySelector('.new-book img').addEventListener('error', toggleEmptyImage);
             document.querySelector('.new-book').classList.remove('new-book');
         } else {
+            console.log(editingBook)
             editingBook.querySelector('.book-title').textContent = localStorage.title;
             editingBook.querySelector('.book-authors').textContent = localStorage.author;
-            editingBook.querySelector('.book-publish').textContent = localStorage.year;
+            editingBook.querySelector('.book-publish p').textContent = localStorage.year;
             editingBook.querySelector('img').src = localStorage.pic || 'src/no-image.png';
             editingBook.querySelector('img').addEventListener('error', toggleEmptyImage);
             editingBook.classList.remove('editing');
@@ -125,6 +132,7 @@ function handleInput(event) {
     checkLocalStorage();
 }
 
+// Проверка локального хранилища
 function checkLocalStorage() {
     if (localStorage.title && localStorage.author && localStorage.year) {
         document.querySelector('.btn-submit').classList.remove('hidden');
@@ -176,9 +184,9 @@ function createBook(item, isNewBook) {
                     },
                     { tag: 'div', cls: ['book', 'book-info-wrapper'], content:
                         [
-                            { tag: 'div', cls: ['book-info', 'book-title'], content: item.title },
-                            { tag: 'div', cls: ['book-info', 'book-authors'], content: item.author },
-                            { tag: 'div', cls: ['book-info', 'book-publish'], content: item.year }
+                            { tag: 'div', cls: ['book-info', 'book-title'], content: { tag: 'p', content: item.title } },
+                            { tag: 'div', cls: ['book-info', 'book-authors'], content: { tag: 'p', content: item.author } },
+                            { tag: 'div', cls: ['book-info', 'book-publish'], content: { tag: 'p', content: item.year } }
                         ]
                     },
                     { tag: 'div', cls: ['book', 'book-edit-conrols'], content:
