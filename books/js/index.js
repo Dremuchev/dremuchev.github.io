@@ -18,7 +18,6 @@ function goTo(target) {
     if (target === 'form') {
         mainContent.classList.add('hidden');
         mainForm.classList.remove('hidden');
-        localStorage.clear();
     }
 }
 
@@ -63,17 +62,17 @@ function bookEdit(event) {
         event.preventDefault();
         const editingBook = document.querySelector('.editing');
         if (!editingBook) {
+            checkLocalStorage();
             const newBook = createBookEngine(createBook(localStorage, true));
             mainContent.insertBefore(newBook, document.querySelector('.book-wrapper'));
             document.querySelector('.new-book img').addEventListener('error', toggleEmptyImage);
-            document.querySelector('.new-book img').removeEventListener('error', toggleEmptyImage);
+            document.querySelector('.new-book').classList.remove('new-book');
         } else {
             editingBook.querySelector('.book-title').textContent = localStorage.title;
             editingBook.querySelector('.book-authors').textContent = localStorage.author;
             editingBook.querySelector('.book-publish').textContent = localStorage.year;
             editingBook.querySelector('img').src = localStorage.pic || 'src/no-image.png';
             editingBook.querySelector('img').addEventListener('error', toggleEmptyImage);
-            editingBook.querySelector('img').removeEventListener('error', toggleEmptyImage);
             editingBook.classList.remove('editing');
         }
         goTo('content');
@@ -87,6 +86,7 @@ function bookEdit(event) {
 
 // Проверка изображения книги
 function toggleEmptyImage(event) {
+    console.log(event.currentTarget)
     event.currentTarget.src= 'src/no-image.png';
 }
 
