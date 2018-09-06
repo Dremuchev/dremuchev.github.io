@@ -272,9 +272,3 @@ div p {
 .footer-title {
     text-align: center;
 }
-
-#wall {
-  position: absolute;
-  z-index: -1;
-  opacity: 0.3;
-}
