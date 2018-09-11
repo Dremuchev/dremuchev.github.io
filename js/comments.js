@@ -1,6 +1,7 @@
 'use strict';
 
-canvas.addEventListener('click', createNewComment);
+canvas.addEventListener("click", createNewComment);
+// canvas.addEventListener('click', createComments);
 document.querySelector('.app').addEventListener('click', messageHandler);
 document.addEventListener('click', markerClick);
 document.addEventListener('click', closeForm);
@@ -60,6 +61,7 @@ function markerClick(event) {
 function removeEmptyComment() {
     console.log(`Запущена функция removeEmptyComment()`);
     const isNewComment = document.getElementsByClassName('comments__form new')[0];
+    console.log(isNewComment);
     if (isNewComment) {
         document.querySelector('.app').removeChild(isNewComment);
     }
@@ -68,8 +70,8 @@ function removeEmptyComment() {
 // закрытие текущей формы
 
 function closeForm(event) {
-    console.log(`Запущена функция closeForm()`);
     if (event.target.className === 'comments__close') {
+        console.log(`Запущена функция closeForm()`);
         event.target.parentNode.style.display = 'none';
     }
 }
@@ -87,19 +89,22 @@ function closeAllForms() {
 // функция удаления всех существующих форм из DOM
 
 function clearForms() {
-    console.log(`Запущена функция clearForms()`);
-    const forms = document.querySelectorAll('.comments__form');
-    for (const form of forms) {
-        document.querySelector('.app').removeChild(form);
+    if (document.querySelector('.comments__form')) {
+        console.log(`Запущена функция clearForms()`);
+        const forms = document.querySelectorAll('.comments__form');
+        console.log("TCL: clearForms -> forms", forms);
+        for (const form of forms) {
+            document.querySelector('.app').removeChild(form);
+        }
     }
 }
 
 // функция создания новой (пустой) формы
 
 function createNewComment(event) {
-    console.log(`Запущена функция createNewComment()`);
     const isCommentsOn = document.getElementById('comments-on').checked;
     if (comments.dataset.state === 'selected' && isCommentsOn) {
+        console.log(`Запущена функция createNewComment()`);
         const app = document.querySelector('.app');
         removeEmptyComment();
         closeAllForms();
@@ -161,15 +166,25 @@ function createNewComment(event) {
 // обработка ввода нового комментария и создание объекта с параметрами нового комментария
 
 function messageHandler(event) {
-    console.log(`Запущена функция messageHandler()`);
     if (event.target.className === 'comments__submit') {
+    console.log(`Запущена функция messageHandler()`);
         event.preventDefault();
         const element = event.target.parentNode.querySelector('textarea');
         const form = event.target.parentNode.parentNode;
+        const pic = document.querySelector("img");
+        const imageHeight = pic.getBoundingClientRect().height;
+        const imageWidth = pic.getBoundingClientRect().width;
+        const imageLeft = pic.getBoundingClientRect().x;
+        const imageTop = pic.getBoundingClientRect().y;
+
         if (element.value) {
-            const comment = {'message': element.value, 'left': parseInt(form.style.left), 'top': parseInt(form.style.top)};
+            const comment = {
+                'message': element.value, 
+                'left': ((parseFloat(form.style.left) - imageLeft) / imageWidth).toFixed(3), 
+                'top': ((parseFloat(form.style.top) - imageTop) / imageHeight).toFixed(3)
+            };
             needReload = true;
-            sendNewComment(imgID, comment, form);
+            sendNewComment(sessionStorage.id, comment, form);
             element.value = '';
         }
     }
@@ -180,7 +195,9 @@ function messageHandler(event) {
 function createCommentsArray(comments) {
     console.log(`Запущена функция createCommentsArray()`);
     const commentArray = [];
-    console.log(comments)
+
+    console.log('TCL: createCommentsArray -> commentArray', commentArray);
+
     for (const comment in comments) {
         commentArray.push(comments[comment]);
     }
@@ -191,11 +208,17 @@ function createCommentsArray(comments) {
 // наполнение DOM комментариями
 
 function createCommentForm(comments) {
+    console.log('TCL: createCommentForm -> comments', comments);
     console.log(`Запущена функция createCommentForm()`);
-    console.log(comments);
     const app = document.querySelector('.app');
 
+    const imageHeight = document.querySelector('img').getBoundingClientRect().height;
+    const imageWidth = document.querySelector('img').getBoundingClientRect().width;
+    const imageLeft = document.querySelector('img').getBoundingClientRect().x;
+    const imageTop = document.querySelector('img').getBoundingClientRect().y;
+
     for (let comment of comments) {
+        console.log('TCL: createCommentForm -> comment', comment);
         closeAllForms();
 
         const form = document.createElement('div');
@@ -226,14 +249,18 @@ function createCommentForm(comments) {
         commit.appendChild(time);
         commit.appendChild(message);
 
-        const current = document.querySelector(`.comments__form[style="left: ${comment.left}px; top: ${comment.top}px;"]`);
+        const current = document.querySelector(`.comments__form[data-aspect-left='${comment.left}'], [data-aspect-top='${comment.top}']`);
 
         if (!current) {
             commentsBody.appendChild(commit);
-            form.style.left = comment.left + 'px';
-            form.style.top = comment.top + 'px';
+            form.style.left = `${imageWidth * comment.left + imageLeft}px`;
+            form.style.top = `${comment.top * imageHeight + imageTop}px`;
+            form.dataset.aspectLeft = comment.left;
+            form.dataset.aspectTop = comment.top;
             app.appendChild(form);
         } else {
+            form.dataset.aspectLeft = comment.left;
+            form.dataset.aspectTop = comment.top;
             appendComment(commit, current);
         }
 
@@ -278,6 +305,7 @@ function createCommentForm(comments) {
 // добавления комментария в существующую форму
 
 function appendComment(element, target) {
+    console.log(target)
     console.log(`Запущена функция appendComment()`);
     const comments = target.querySelector('.comments__body').querySelectorAll('.comment');
     closeAllForms();
@@ -287,3 +315,106 @@ function appendComment(element, target) {
     }
     needReload = false;
 }
+
+    // переписал создание новой формы комментариев
+
+    function createComments(event) {
+        const isCommentsOn = document.getElementById('comments-on').checked;
+        if (comments.dataset.state === 'selected' && isCommentsOn) {
+            removeEmptyComment();
+            closeAllForms();
+            const app = document.querySelector('.app');
+            const emptyFragment = document.createDocumentFragment();
+            emptyFragment.appendChild(commentTemplateEngine(commentTemplate(event)));
+            app.appendChild(emptyFragment);
+            const newComment = document.querySelector('.comments__form new');
+            console.log(newComment)
+            newComment.querySelector('.comments__close')
+                .addEventListener('click', removeEmptyComment);
+            newComment.style.left = event.pageX + "px";
+            newComment.style.top = event.pageY + "px";
+        }
+    }
+
+    function commentTemplateEngine(comment) {
+        if (comment === undefined || comment === null || comment === false) {
+            return document.createTextNode("");
+        }
+
+        if (typeof comment === "string" || typeof comment === "number") {
+            return document.createTextNode(comment);
+        }
+
+        if (Array.isArray(comment)) {
+            return comment.reduce((emptyElement, el) => {
+                emptyElement.appendChild(commentTemplateEngine(el));
+                return emptyElement;
+            }, document.createDocumentFragment())
+        }
+
+        const element = document.createElement(comment.tag || "div");
+
+        [].concat(comment.className || []).forEach(cls => element.classList.add(cls));
+
+        if (comment.attr) {
+            Object.keys(comment.attr).forEach(key => element.setAttribute(key, comment.attr[key]));
+        }
+
+        element.appendChild(commentTemplateEngine(comment.content));
+
+        return element;
+    }
+
+    function commentTemplate(event) {
+        return {
+            tag: 'div', 
+            className: ['comments__form', 'new'],
+            attr: { style: `left: ${event.pageX}px; top: ${event.pageY}px` },
+            content: [
+                { 
+                    tag: 'span', 
+                    className: 'comments__marker' 
+                },
+
+                { 
+                    tag: 'div', 
+                    className: 'comments__body', 
+                    attr: { style: 'display: block' }, 
+                    content: [
+                        { 
+                            tag: 'div', 
+                            className: 'comment', 
+                            content: [
+                                {
+                                    tag: 'div', 
+                                    className: ['loader', 'hidden'], 
+                                    content: [
+                                        { tag: 'span' },
+                                        { tag: 'span' },
+                                        { tag: 'span' },
+                                        { tag: 'span' },
+                                        { tag: 'span' }
+                                    ]
+                                }
+                            ] 
+                        },
+                        {
+                            tag: 'textarea', 
+                            className: 'comments__input', 
+                            attr: { type: 'text', placeholder: 'Напишите ответ...' }
+                        },
+                        {
+                            tag: 'input',
+                            className: 'comments__close',
+                            attr: { type: 'button', value: 'Закрыть' }
+                        },
+                        {
+                            tag: 'input',
+                            className: 'comments__submit',
+                            attr: { type: 'submit', value: 'Отправить' }
+                        }
+                    ]
+                }
+            ]
+        }
+    }

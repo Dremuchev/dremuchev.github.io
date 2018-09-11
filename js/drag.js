@@ -3,7 +3,12 @@
 document.body.addEventListener('dragover', event => event.preventDefault());
 document.body.addEventListener('drop', onFilesDrop);
 document.addEventListener('mousemove', dragStart, false);
-document.addEventListener('mouseup', dragStop);
+let movedPiece = null;
+document.addEventListener('mouseup', () => {
+    if (movedPiece) {
+        movedPiece = null;
+    }
+});
 
 function dragStart(event) {
     if (movedPiece) {
@@ -17,12 +22,6 @@ function dragStart(event) {
         cords.y = Math.max(cords.y, 0);
         movedPiece.style.left = `${cords.x}px`;
         movedPiece.style.top = `${cords.y}px`;
-    }
-}
-
-function dragStop() {
-    if (movedPiece) {
-        movedPiece = null;
     }
 }
 

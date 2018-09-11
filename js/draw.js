@@ -10,16 +10,15 @@ let color = {'red': '#ea5d56', 'yellow': '#f3d135', 'green': '#6cbe47', 'blue': 
 let drawing = false;
 let needsRepaint = false;
 
-function colorSelect(event) {
+canvas.addEventListener('dblclick', clearCanvas);
+
+colorButtons.addEventListener('click', event => {
     if (event.target.name === 'color') {
         const currentColor = document.querySelector('.menu__color[checked]');
         currentColor.removeAttribute('checked');
         event.target.setAttribute('checked', '');
     }
-}
-
-canvas.addEventListener('dblclick', clearCanvas);
-colorButtons.addEventListener('click', colorSelect);
+});
 
 function clearCanvas() {
     console.log(`Запущена функция clearCanvas()`);
@@ -29,8 +28,8 @@ function clearCanvas() {
 }
 
 function getColor() {
-    const currentColor = document.querySelector('.menu__color[checked]').value;
-    return color[currentColor];
+    const currentColor = document.querySelector('.menu__color:checked');
+    return color[currentColor.value];
 }
 
 function smoothCurveBetween (p1, p2) {
@@ -45,7 +44,6 @@ function smoothCurve(points) {
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     ctx.moveTo(...points[0]);
-
     for(let i = 1; i < points.length - 1; i++) {
         smoothCurveBetween(points[i], points[i + 1]);
     }
@@ -54,22 +52,22 @@ function smoothCurve(points) {
 
 canvas.addEventListener("mousedown", event => {
     if (draw.dataset.state === 'selected') {
-    const curve = [];
-    drawing = true;
-    curve.push([event.offsetX, event.offsetY]);
-    curves.push(curve);
-    needsRepaint = true;
-}
+        const curve = [];
+        drawing = true;
+        curve.push([event.offsetX, event.offsetY]);
+        curves.push(curve);
+        needsRepaint = true;
+    }
 });
 
 canvas.addEventListener("mouseup", () => {
     curves = [];
-drawing = false;
+    drawing = false;
 });
 
 canvas.addEventListener("mouseleave", () => {
     curves = [];
-drawing = false;
+    drawing = false;
 });
 
 canvas.addEventListener("mousemove", event => {
