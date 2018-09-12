@@ -1,5 +1,7 @@
 'use strict';
 
+//поправки
+
 canvas.addEventListener("click", createNewComment);
 // canvas.addEventListener('click', createComments);
 document.querySelector('.app').addEventListener('click', messageHandler);
