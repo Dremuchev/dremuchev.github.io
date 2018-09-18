@@ -92,6 +92,7 @@ function maskSize() {
     console.log("TCL: maskSize -> img.width", img.width);
     mask.width = img.width;
     mask.height = img.height;
+    checkFormsPosition();
 }
 
 // уточнение положения форм с комментариями относительно картинки

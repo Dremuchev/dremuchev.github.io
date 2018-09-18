@@ -188,7 +188,7 @@ function sendMask(response) {
             console.log('Событие comment...');
             pullComments(response);
         } else {
-            loadImg(response.pic.url).then(() => canvasSize());
+            if(response.pic) loadImg(response.pic.url).then(() => canvasSize());
         }
     }
 }
